@@ -13,6 +13,16 @@ import datetime
 
 logger = logging.getLogger(__name__)
 
+
+#
+# Amazon Titan Large
+# https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-parameters-titan-text.html
+#
+#
+print("---" * 42)
+print("Amazon Titan Large")
+print("---" * 42)
+
 #bedrock = boto3.client('bedrock')
 bedrock_runtime = boto3.client('bedrock-runtime')
 
@@ -25,28 +35,6 @@ prompt_data_jp = """Command: リーダーとしてビジネス上の強力な意
 
 Blog:
 """
-
-
-#
-# Amazon Titan Large
-# https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-parameters-titan-text.html
-#
-#
-print("---" * 42)
-print("Amazon Titan Large")
-print("---" * 42)
-
-
-prompt_data = """Command: Write me a blog about making strong business decisions as a leader.
-
-Blog:
-"""
-
-prompt_data_jp = """Command: リーダーとしてビジネス上の強力な意思決定を下すことについてブログを書いてください。
-
-Blog:
-"""
-
 
 try:
     
@@ -87,6 +75,9 @@ print("---" * 42)
 print("Anthropic Claude")
 print("---" * 42)
 
+#bedrock = boto3.client('bedrock')
+bedrock_runtime = boto3.client('bedrock-runtime')
+
 prompt_data = """Human: Write me a blog about making strong business decisions as a leader.
 
 Assistant:
@@ -96,7 +87,6 @@ prompt_data_jp = """Human: リーダーとしてビジネス上の強力な意�
 
 Assistant:
 """
-
 
 try:
 
@@ -145,7 +135,6 @@ prompt_data_jp = """Human: リーダーとしてビジネス上の強力な意�
 Assistant:
 """
 
-
 try:
 
     body = json.dumps(
@@ -193,7 +182,6 @@ prompt_data_jp = """Human: リーダーとしてビジネス上の強力な意�
 
 Assistant:
 """
-
 
 try:
 
