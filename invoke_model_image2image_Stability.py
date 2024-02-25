@@ -82,14 +82,15 @@ def main_handler(event,context):
     
     bucket = event["bucket"]
     key = event["key"]
-    downloaded = prifix + "downloaded_" + key
     resized = prifix +  "resized.png"
+    model_id='stability.stable-diffusion-xl-v1'
+    prompt=event["prompt"]
                         
-    # Download from S3
     s3 = boto3.client('s3')
     # download file from S3 bucket
     time_start = time.perf_counter()
-    s3.download_file(bucket, key, downloaded)
+    response = s3.get_object(Bucket = bucket, Key = key)
+    s3obj = response["Body"].read()
 
     time_end = time.perf_counter()
     time_diff = time_end- time_start
@@ -99,17 +100,13 @@ def main_handler(event,context):
     # また、base64 にした後のサイズにも制限がある
     
     # リサイズ前の画像を読み込み
-    img = Image.open(downloaded)
+    img = Image.open(io.BytesIO(s3obj))
     # 読み込んだ画像の幅、高さを取得し変更
     (width, height) = (img.width // 4, img.height // 4)
     # 画像をリサイズする
     img_resized = img.resize((width, height))
     img_resized.save(resized)
-
-    model_id='stability.stable-diffusion-xl-v1'
-
-    prompt=event["prompt"]
-
+   
     # Read reference image from file and encode as base64 strings.
     with open(resized,"rb") as image_file:
         init_image = base64.b64encode(image_file.read()).decode('utf8')
@@ -130,12 +127,12 @@ def main_handler(event,context):
     try:
         image_bytes=generate_image(model_id = model_id,
                                  body = body)
-        image = Image.open(io.BytesIO(image_bytes))
+        #image = Image.open(io.BytesIO(image_bytes))
         #image.show()
         dt_now = datetime.datetime.now()
         generated_image = "gen_" + str(dt_now) + ".png"
-        image.save(prifix + generated_image)
-        s3.upload_file(prifix + generated_image, bucket,generated_image )
+        #image.save(prifix + generated_image)
+        s3.put_object(Body=image_bytes, Bucket = bucket, Key = generated_image )
         response = s3.generate_presigned_url('get_object',
                                                     Params={'Bucket': bucket,
                                                             'Key': generated_image},
@@ -157,7 +154,7 @@ def main_handler(event,context):
 
 
 if __name__ == "__main__":
-    event = {"prompt":"Scenery where a dog is relaxing", "bucket":"tnobe-images", "key": "dog11MB.png"}
+    event = {"prompt":"Scenery of two dogs sitting and relaxing", "bucket":"tnobe-images", "key": "dog11MB.png"}
     context = {}
     url = main_handler(event,context)
     print(url)
